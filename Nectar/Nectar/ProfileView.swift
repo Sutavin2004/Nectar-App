@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @Binding var currentScreen: String?
+    
 
     // Sample profile data
     @State private var name = "John Doe"
@@ -36,29 +36,13 @@ struct ProfileView: View {
             }
             .padding()
 
-            // Navigate to Settings
-            Button(action: {
-                currentScreen = "settings" // Navigate to Settings screen
-            }) {
-                Text("Go to Settings")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .font(.title2)
-            }
+            
             .padding()
 
             Spacer()
 
             // Back Button to go back to Home
-            Button("Back to Home") {
-                currentScreen = nil // Go back to the Home screen
-            }
-            .padding()
-            .background(Color.red)
-            .foregroundColor(.white)
-            .cornerRadius(10)
+            
         }
         .padding()
         .navigationTitle("Profile") // Add title for navigation bar
@@ -67,6 +51,6 @@ struct ProfileView: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView(currentScreen: .constant("profile"))
+        ProfileView()
     }
 }

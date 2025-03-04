@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct JobPostingView: View {
-    @Binding var currentScreen: String?
+    
 
     @State private var jobTitle = ""
     @State private var jobDescription = ""
@@ -35,13 +35,7 @@ struct JobPostingView: View {
             .foregroundColor(.white)
             .cornerRadius(10)
 
-            Button("Back to Home") {
-                currentScreen = nil // Go back to the Home screen
-            }
-            .padding()
-            .background(Color.red)
-            .foregroundColor(.white)
-            .cornerRadius(10)
+            
         }
         .padding()
     }
@@ -49,6 +43,6 @@ struct JobPostingView: View {
 
 struct JobPostingView_Previews: PreviewProvider {
     static var previews: some View {
-        JobPostingView(currentScreen: .constant("jobPosting"))
+        JobPostingView()
     }
 }

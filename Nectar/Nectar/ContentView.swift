@@ -7,84 +7,78 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @State private var currentScreen: String? = nil // Track the current screen
+struct ContentView: View {    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                Spacer()
+                Text("Nectar")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .padding()
+                    .foregroundColor(.black)
+
+                
+                NavigationLink(destination: HomeView()) {
+                    ButtonView(title: "Sign In")
+                }
+               
+                NavigationLink(destination: HomeView()) {
+                    ButtonView(title: "Sign Up")
+                }
+                
+                Spacer()
+            }
+            
+            .padding()
+            .navigationTitle("")
+            .containerRelativeFrame([.horizontal, .vertical])
+            .background(Gradient(colors: [.yellow, .orangish, .gold]).opacity(0.8))
+        }
+        
+    }
+}
+
+struct HomeView: View {
+    @State private var currentScreen: String?  // Track the current screen
 
     var body: some View {
-        HStack {
-            // Left side: Buttons for navigation
-            VStack(spacing: 30) {
-                // Home Screen title and description
-                Text("Welcome to Nectar")
-                    .font(.largeTitle)
-                    .padding()
-
-                Text("A platform for aspiring professionals to find hands-on work opportunities.")
-                    .font(.body)
-                    .padding()
-
-                // Add an image or icon for the app (Optional)
-                Image(systemName: "app.fill")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .padding()
-
-                // Button to navigate to Job Listings
-                Button(action: {
-                    currentScreen = "jobListings"
-                }) {
-                    Text("Go to Job Listings")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .font(.title2)
+        TabView {
+            JobListingsView()
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
                 }
-
-                // Button to navigate to Profile
-                Button(action: {
-                    currentScreen = "profile"
-                }) {
-                    Text("Go to Profile")
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .font(.title2)
+            JobPostingView()
+                .tabItem {
+                    Image(systemName: "plus.circle.fill")
+                    Text("Post Job")
                 }
-
-                // Button to navigate to Job Posting
-                Button(action: {
-                    currentScreen = "jobPosting"
-                }) {
-                    Text("Go to Job Posting")
-                        .padding()
-                        .background(Color.orange)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .font(.title2)
+            
+            ProfileView()
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
                 }
-
-                Spacer() // To ensure buttons stay at the top
-            }
-            .padding()
-
-            // Right side: Content that changes based on button press
-            VStack {
-                if currentScreen == "jobListings" {
-                    JobListingsView(currentScreen: $currentScreen)
-                } else if currentScreen == "profile" {
-                    ProfileView(currentScreen: $currentScreen)
-                } else if currentScreen == "jobPosting" {
-                    JobPostingView(currentScreen: $currentScreen)
-                } else {
-                    Text("Select a screen to navigate.")
-                        .font(.title)
-                        .foregroundColor(.gray)
-                }
-            }
-            .frame(maxWidth: .infinity) // Ensures the content takes the rest of the screen width
+            
         }
+        
+    }
+}
+
+struct ButtonView: View {
+    let title: String
+    
+    var body: some View {
+        Text(title)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical,20)
+            .background(Color.yellow)
+            .foregroundColor(.black)
+            .cornerRadius(10)
+            .shadow(radius: 50)
+            .padding(.horizontal, 20)
+            .fontWeight(.bold)
     }
 }
 

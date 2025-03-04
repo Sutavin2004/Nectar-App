@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct JobListingsView: View {
-    @Binding var currentScreen: String?
+    
 
     var body: some View {
         VStack {
@@ -23,13 +23,7 @@ struct JobListingsView: View {
                 Text("Job 3: Graphic Designer")
             }
 
-            Button("Back to Home") {
-                currentScreen = nil // Go back to the Home screen
-            }
-            .padding()
-            .background(Color.red)
-            .foregroundColor(.white)
-            .cornerRadius(10)
+            
         }
         .padding()
     }
@@ -37,6 +31,6 @@ struct JobListingsView: View {
 
 struct JobListingsView_Previews: PreviewProvider {
     static var previews: some View {
-        JobListingsView(currentScreen: .constant("jobListings"))
+        JobListingsView()
     }
 }
