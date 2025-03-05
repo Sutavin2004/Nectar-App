@@ -8,49 +8,30 @@
 import SwiftUI
 
 struct ProfileView: View {
-    
-
-    // Sample profile data
-    @State private var name = "John Doe"
-    @State private var email = "john.doe@example.com"
-    @State private var skills = ["Swift", "UI Design", "GitHub", "Project Management"]
-    @State private var experience = "2 years"
+    let user: User
 
     var body: some View {
         VStack {
-            // Profile Header
             Text("User Profile")
                 .font(.largeTitle)
                 .padding()
 
-            // Profile Info Section
             VStack(alignment: .leading, spacing: 15) {
-                Text("Name: \(name)")
+                Text("Name: \(user.name)")
                     .font(.headline)
-                Text("Email: \(email)")
+                Text("Email: \(user.email)")
                     .font(.headline)
-                Text("Skills: \(skills.joined(separator: ", "))")
+                Text("Skills: \(user.skills)")
                     .font(.headline)
-                Text("Experience: \(experience)")
+                Text("Experience: \(user.experience)")
                     .font(.headline)
             }
             .padding()
 
-            
-            .padding()
-
             Spacer()
-
-            // Back Button to go back to Home
-            
         }
         .padding()
-        .navigationTitle("Profile") // Add title for navigation bar
+        .navigationTitle("Profile")
     }
 }
 
-struct ProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProfileView()
-    }
-}
