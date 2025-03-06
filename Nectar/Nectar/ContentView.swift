@@ -9,60 +9,72 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isSignedIn = false // Tracks authentication status
-      @State private var showSignUp = false // Toggle for showing sign up screen
-      @State private var showSignIn = false // Toggle for showing sign in screen
-      @State private var currentUser: User? = nil // Stores the logged-in user
+    @State private var showSignUp = false // Toggle for showing sign up screen
+    @State private var showSignIn = false // Toggle for showing sign in screen
+    @State private var currentUser: User? = nil // Stores the logged-in user
     
     var body: some View {
-            HStack {
-                VStack(spacing: 30) {
-                    Text("Welcome to Nectar")
-                        .font(.largeTitle)
-                        .padding()
-                    
-                    Text("A platform for aspiring professionals to find hands-on work opportunities.")
-                        .font(.body)
-                        .padding()
-
-                    Image(systemName: "app.fill")
-                        .resizable()
-                        .frame(width: 100, height: 100)
-                        .padding()
-
-                    ButtonView(title: "Sign In") {
-                        showSignIn = true
+        NavigationView {
+            if isSignedIn, let user = currentUser {
+                // ✅ Show main screen after signing in
+                HomeView(user: user)
+            } else {
+                // ✅ Show Welcome Screen before login
+                WelcomeScreen(showSignUp: $showSignUp, showSignIn: $showSignIn)
+                    .sheet(isPresented: $showSignUp) {
+                        SignUpView(isSignedIn: $isSignedIn, currentUser: $currentUser)
                     }
-
-                    ButtonView(title: "Sign Up") {
-                        showSignUp = true
+                    .sheet(isPresented: $showSignIn) {
+                        SignInView(isSignedIn: $isSignedIn, currentUser: $currentUser)
                     }
-
-                    Spacer()
-                }
-                .padding()
-                .background(Gradient(colors: [.yellow, .orangish, .gold]).opacity(0.8))
-
-                VStack {
-                    if isSignedIn, let user = currentUser {
-                        HomeView(user: user)
-                    } else {
-                        Text("Please Sign In or Sign Up to continue.")
-                            .font(.title)
-                            .foregroundColor(.gray)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .sheet(isPresented: $showSignUp) {
-                SignUpView(isSignedIn: $isSignedIn, currentUser: $currentUser)
-            }
-            .sheet(isPresented: $showSignIn) {
-                SignInView(isSignedIn: $isSignedIn, currentUser: $currentUser)
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle()) // ✅ Prevents unwanted split-screen effects on iPad
+    }
 }
 
-// MARK: - HomeView with Top Navigation Tabs
+// MARK: - Welcome Screen (Fixes Split-Screen Issue)
+struct WelcomeScreen: View {
+    @Binding var showSignUp: Bool
+    @Binding var showSignIn: Bool
+
+    var body: some View {
+        ZStack {
+            // ✅ Background gradient wrapped in Color
+            LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea() // ✅ Correct way to extend background
+
+            VStack(spacing: 30) {
+                Spacer()
+                
+                Text("Welcome to Nectar")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .padding()
+                    .multilineTextAlignment(.center)
+                
+                Text("A platform for aspiring professionals to find hands-on work opportunities.")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+                
+                Image(systemName: "app.fill")
+                    .resizable()
+                    .frame(width: 100, height: 100)
+                    .padding()
+
+                ButtonView(title: "Sign In", action: { showSignIn = true })
+                ButtonView(title: "Sign Up", action: { showSignUp = true })
+                
+                Spacer()
+            }
+            .padding()
+        }
+    }
+}
+
+
+// MARK: - Home Screen (After Sign In)
 struct HomeView: View {
     let user: User
     
