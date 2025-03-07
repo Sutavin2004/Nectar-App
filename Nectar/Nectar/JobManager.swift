@@ -8,21 +8,25 @@
 import SwiftUI
 
 class JobManager: ObservableObject {
-    @Published var jobs: [Job] = [
-        Job(title: "Software Developer", company: "Apple", location: "Cupertino, CA", salary: "$120k - $150k", responsibilities: "Develop iOS applications, collaborate with cross-functional teams, write clean and scalable code.", education: "Bachelor’s in Computer Science or equivalent experience"),
-        Job(title: "Data Analyst", company: "Google", location: "New York, NY", salary: "$80k - $110k", responsibilities: "Analyze large datasets, generate reports, optimize business processes.", education: "Bachelor’s in Statistics, Mathematics, or related field"),
-        Job(title: "UI/UX Designer", company: "Meta", location: "San Francisco, CA", salary: "$90k - $130k", responsibilities: "Design intuitive interfaces, conduct user research, collaborate with developers.", education: "Bachelor’s in Design, Human-Computer Interaction, or similar"),
-        Job(title: "Product Manager", company: "Tesla", location: "Austin, TX", salary: "$110k - $140k", responsibilities: "Define product vision, manage development cycles, coordinate with stakeholders.", education: "Bachelor’s in Business, Engineering, or related field"),
-        Job(title: "Cybersecurity Analyst", company: "Microsoft", location: "Redmond, WA", salary: "$95k - $125k", responsibilities: "Monitor security threats, implement cybersecurity protocols, conduct risk assessments.", education: "Bachelor’s in Cybersecurity, Computer Science, or related field"),
-        Job(title: "Marketing Coordinator", company: "Amazon", location: "Seattle, WA", salary: "$65k - $85k", responsibilities: "Develop marketing strategies, manage campaigns, analyze market trends.", education: "Bachelor’s in Marketing, Communications, or related field"),
-        Job(title: "Mechanical Engineer", company: "SpaceX", location: "Hawthorne, CA", salary: "$100k - $135k", responsibilities: "Design and test aerospace components, collaborate with engineers, improve manufacturing processes.", education: "Bachelor’s in Mechanical Engineering or equivalent"),
-        Job(title: "Financial Analyst", company: "Goldman Sachs", location: "New York, NY", salary: "$90k - $120k", responsibilities: "Conduct financial forecasting, prepare reports, assess investment opportunities.", education: "Bachelor’s in Finance, Accounting, or related field"),
-        Job(title: "Software Developer", company: "Netflix", location: "Los Gatos, CA", salary: "$130k - $160k", responsibilities: "Develop high-performance applications, optimize video streaming algorithms, collaborate with engineers.", education: "Bachelor’s in Computer Science or equivalent experience"),
-        Job(title: "Graphic Designer", company: "Adobe", location: "San Jose, CA", salary: "$75k - $100k", responsibilities: "Create visual designs, collaborate with marketing teams, develop brand guidelines.", education: "Bachelor’s in Graphic Design, Visual Arts, or related field")
+    @Published var jobs: [JobPosting] = [
+        JobPosting(title: "software developer", company: "apple", industry: "technology", location: "cupertino, ca", salary: 130000, responsibilities: "develop ios applications, collaborate with teams, write clean code.", education: "bachelor’s in computer science"),
+        JobPosting(title: "data analyst", company: "google", industry: "technology", location: "new york, ny", salary: 90000, responsibilities: "analyze datasets, generate reports, optimize business processes.", education: "bachelor’s in statistics"),
+        JobPosting(title: "financial analyst", company: "goldman sachs", industry: "finance", location: "new york, ny", salary: 110000, responsibilities: "conduct financial forecasting, prepare reports, assess investment opportunities.", education: "bachelor’s in finance"),
+        JobPosting(title: "registered nurse", company: "johns hopkins hospital", industry: "healthcare", location: "baltimore, md", salary: 85000, responsibilities: "provide patient care, administer medications.", education: "bachelor’s in nursing"),
+        JobPosting(title: "mechanical engineer", company: "spacex", industry: "engineering", location: "hawthorne, ca", salary: 120000, responsibilities: "design and test aerospace components.", education: "bachelor’s in mechanical engineering")
     ]
-    
-    // ✅ Function to Add a New Job
-    func addJob(_ job: Job) {
+
+    // Returns jobs that match user preferences
+    func filteredJobs(industry: String, minSalary: Int, location: String) -> [JobPosting] {
+        return jobs.filter { job in
+            (industry == "all" || job.industry.lowercased() == industry.lowercased()) &&
+            job.salary >= minSalary &&
+            (location.isEmpty || job.location.lowercased().contains(location.lowercased()))
+        }
+    }
+
+    // Adds a new job posting to the list
+    func addJob(_ job: JobPosting) {
         jobs.append(job)
     }
 }

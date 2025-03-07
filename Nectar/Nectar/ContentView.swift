@@ -8,20 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isSignedIn = false // Tracks authentication status
-    @State private var showSignUp = false // Toggle for showing sign up screen
-    @State private var showSignIn = false // Toggle for showing sign in screen
-    @State private var currentUser: User? = nil // Stores the logged-in user
+    @State private var isSignedIn = false // Tracks if the user is signed in
+    @State private var showSignUp = false // Controls the visibility of the sign-up screen
+    @State private var showSignIn = false // Controls the visibility of the sign-in screen
+    @State private var currentUser: User? = nil // Stores the currently logged-in user
     
-    @StateObject private var jobManager = JobManager()
+    @StateObject private var jobManager = JobManager() // Manages job listings and applications
     
     var body: some View {
         NavigationView {
             if isSignedIn, let user = currentUser {
-                // ✅ Show main screen after signing in
+                // Show the main screen after user signs in
                 HomeView(user: user, jobManager: jobManager)
             } else {
-                // ✅ Show Welcome Screen before login
+                // Show the welcome screen before login
                 WelcomeScreen(showSignUp: $showSignUp, showSignIn: $showSignIn)
                     .sheet(isPresented: $showSignUp) {
                         SignUpView(isSignedIn: $isSignedIn, currentUser: $currentUser)
@@ -31,42 +31,55 @@ struct ContentView: View {
                     }
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // ✅ Prevents unwanted split-screen effects on iPad
+        .navigationViewStyle(StackNavigationViewStyle()) // Prevents split-screen issues on iPad
     }
 }
 
-// MARK: - Welcome Screen (Fixes Split-Screen Issue)
+// MARK: - Welcome Screen
 struct WelcomeScreen: View {
     @Binding var showSignUp: Bool
     @Binding var showSignIn: Bool
-
+    
     var body: some View {
         ZStack {
-            // ✅ Background gradient wrapped in Color
-            LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea() // ✅ Correct way to extend background
-
+            Color(.black)
+                .ignoresSafeArea()
+            
             VStack(spacing: 30) {
                 Spacer()
                 
-                Text("Welcome to Nectar")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding()
-                    .multilineTextAlignment(.center)
+                // Logo and App Name
+                HStack(spacing: 10) {
+                    ZStack {
+                        Image(systemName: "hexagon.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 70, height: 70)
+                            .foregroundColor(Color.orangish)
+                        
+                        Image(systemName: "network")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 45, height: 45)
+                            .foregroundColor(.black.opacity(0.6))
+                    }
+                    
+                    Text("nectar")
+                        .font(.system(size: 70, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                }
                 
-                Text("A platform for aspiring professionals to find hands-on work opportunities.")
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 30)
+                // Tagline
+                Text("swipe, match, succeed.")
+                    .font(.title2)
+                    .foregroundColor(.white)
+                    .padding(.bottom, 20)
                 
-                Image(systemName: "app.fill")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .padding()
-
-                ButtonView(title: "Sign In", action: { showSignIn = true })
-                ButtonView(title: "Sign Up", action: { showSignUp = true })
+                // Sign-in and Sign-up Buttons
+                VStack(spacing: 15) {
+                    ButtonView(title: "sign in", color: .white, textColor: .black) { showSignIn = true }
+                    ButtonView(title: "sign up", color: Color.orangish, textColor: .black) { showSignUp = true }
+                }
                 
                 Spacer()
             }
@@ -75,61 +88,68 @@ struct WelcomeScreen: View {
     }
 }
 
-
-// MARK: - Home Screen (After Sign In)
+// MARK: - Home Screen
 struct HomeView: View {
     let user: User
     @ObservedObject var jobManager: JobManager
     
     var body: some View {
         TabView {
+            // Job Listings Tab
             JobListingsView(jobManager: jobManager)
                 .tabItem {
                     Image(systemName: "house.fill")
-                    Text("Home")
+                    Text("home")
                 }
-            
+                
+            // Post Job Tab
             JobPostingView(jobManager: jobManager)
                 .tabItem {
                     Image(systemName: "plus.circle.fill")
-                    Text("Post Job")
+                    Text("post job")
                 }
-            
+                
+            // Find Job Tab
             JobDetailsView(currentScreen: .constant("jobDetails"))
                 .tabItem {
                     Image(systemName: "magnifyingglass")
-                    Text("Find Job")
+                    Text("find job")
                 }
-            
+                
+            // Profile Tab
             ProfileView(user: user)
                 .tabItem {
                     Image(systemName: "person.fill")
-                    Text("Profile")
+                    Text("profile")
                 }
-            
+                
+            // Settings Tab
             SettingsView(currentScreen: .constant("profile"))
                 .tabItem {
                     Image(systemName: "gearshape.fill")
-                    Text("Settings")
+                    Text("settings")
                 }
         }
+        .accentColor(.yellow)
     }
 }
 
 // MARK: - Reusable Button Component
 struct ButtonView: View {
     let title: String
+    let color: Color
+    let textColor: Color
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
             Text(title)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(Color.yellow)
-                .foregroundColor(.black)
+                .padding(.vertical, 15)
+                .background(color)
+                .foregroundColor(textColor)
                 .cornerRadius(10)
-                .shadow(radius: 50)
+                .shadow(radius: 5)
                 .padding(.horizontal, 20)
                 .fontWeight(.bold)
         }

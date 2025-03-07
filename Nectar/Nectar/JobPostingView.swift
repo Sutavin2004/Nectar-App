@@ -2,112 +2,95 @@
 //  JobPostingView.swift
 //  Nectar
 //
-//  Created by Sutavin Vinothan on 2025-03-02.
+//  Created by Sutavin Vinothan on 2025-03-06.
 //
 
 import SwiftUI
 
 struct JobPostingView: View {
+    @Environment(\.dismiss) var dismiss
     @ObservedObject var jobManager: JobManager
-
-    @State private var jobTitle = ""
-    @State private var companyName = ""
+    
+    @State private var title = ""
+    @State private var company = ""
+    @State private var industry = "technology"
     @State private var location = ""
-    @State private var salary = ""
+    @State private var salary: Double = 50000
     @State private var responsibilities = ""
     @State private var education = ""
 
-    @State private var showConfirmation = false // ✅ New state to show confirmation
-
-    @Environment(\.presentationMode) var presentationMode
+    private let industries = ["technology", "finance", "healthcare", "engineering", "marketing", "education", "legal"]
 
     var body: some View {
         NavigationView {
             VStack {
-                Text("Post a Job")
+                Text("post a job")
                     .font(.largeTitle)
-                    .padding()
-
-                TextField("Job Title", text: $jobTitle)
+                    .foregroundColor(.gold)
+                
+                TextField("job title", text: $title)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                TextField("Company Name", text: $companyName)
+                TextField("company", text: $company)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                TextField("Location", text: $location)
+                Picker("industry", selection: $industry) {
+                    ForEach(industries, id: \.self) { industry in
+                        Text(industry.capitalized)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .padding()
+
+                TextField("location", text: $location)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                TextField("Salary", text: $salary)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                TextField("Responsibilities", text: $responsibilities)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                TextField("Education Requirements", text: $education)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                Button(action: postJob) {
-                    Text("Post Job")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
-                        )
-                        .foregroundColor(.black)
-                        .cornerRadius(10)
-                        .padding(.horizontal, 20)
+                HStack {
+                    Text("salary: $\(Int(salary))")
+                        .foregroundColor(.gold)
+                    Spacer()
                 }
                 .padding()
 
-                if showConfirmation { // ✅ Show confirmation message when job is posted
-                    Text("Job Posted Successfully!")
-                        .foregroundColor(.green)
-                        .font(.headline)
-                        .padding()
+                Slider(value: $salary, in: 30000...200000, step: 5000)
+                    .accentColor(.gold)
+                    .padding()
+
+                TextField("responsibilities", text: $responsibilities)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("education required", text: $education)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                Button("post job") {
+                    let newJob = JobPosting(
+                        title: title,
+                        company: company,
+                        industry: industry,
+                        location: location,
+                        salary: Int(salary),
+                        responsibilities: responsibilities,
+                        education: education
+                    )
+                    jobManager.addJob(newJob)
+                    dismiss()
                 }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.gold)
+                .foregroundColor(.black)
+                .cornerRadius(10)
+                .shadow(radius: 5)
+                .padding(.horizontal, 20)
 
                 Spacer()
             }
             .padding()
-            .navigationBarItems(trailing: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            })
-        }
-    }
-
-    // ✅ Function to Post a Job
-    func postJob() {
-        let newJob = Job(
-            title: jobTitle,
-            company: companyName,
-            location: location,
-            salary: salary,
-            responsibilities: responsibilities,
-            education: education
-        )
-
-        jobManager.addJob(newJob)
-
-        // ✅ Clear input fields
-        jobTitle = ""
-        companyName = ""
-        location = ""
-        salary = ""
-        responsibilities = ""
-        education = ""
-
-        // ✅ Show confirmation message
-        showConfirmation = true
-
-        // ✅ Hide the confirmation message after 2 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            showConfirmation = false
         }
     }
 }

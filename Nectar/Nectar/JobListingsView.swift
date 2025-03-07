@@ -7,114 +7,111 @@
 
 import SwiftUI
 
-struct Job: Identifiable {
-    let id = UUID()
-    let title: String
-    let company: String
-    let location: String
-    let salary: String
-    let responsibilities: String
-    let education: String
-}
-
 struct JobListingsView: View {
     @ObservedObject var jobManager: JobManager
 
     @State private var swipeCount = 0
-    @State private var previousJobs: [Job] = []
+    @State private var previousJobs: [JobPosting] = []
     let maxFreeSwipes = 15
-    
+
     @State private var showJobPosting = false
+    @State private var showPreferences = false
 
     var body: some View {
-        VStack {
-            ZStack {
-                if swipeCount < maxFreeSwipes || isPremiumUser() {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack {
+                HStack {
+                    Button(action: { showPreferences.toggle() }) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.title)
+                            .foregroundColor(.gold)
+                    }
+                    
+                    Spacer()
+                    
+                    Text("\(jobManager.jobs.count) jobs available")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    Button(action: { showJobPosting.toggle() }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.orangish)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+
+                Divider().background(Color.white.opacity(0.2))
+
+                ZStack {
                     ForEach(jobManager.jobs) { job in
-                        JobCardView(job: job) { accepted in
+                        JobCardView(job: .constant(job)) { accepted in
                             handleSwipe(job: job, accepted: accepted)
                         }
                     }
-                } else {
-                    VStack {
-                        Text("You've reached your free swipes!")
-                            .font(.headline)
+                }
+                .frame(height: UIScreen.main.bounds.height * 0.7)
+
+                HStack(spacing: 40) {
+                    Button(action: undoSwipe) {
+                        Image(systemName: "arrow.uturn.backward.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(previousJobs.isEmpty ? .gray : .gold)
+                            .opacity(previousJobs.isEmpty ? 0.5 : 1.0)
+                    }
+                    .disabled(previousJobs.isEmpty)
+
+                    Button(action: { handleSwipe(job: jobManager.jobs.first, accepted: false) }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 50))
                             .foregroundColor(.red)
-                            .padding()
-                        Button("Upgrade to Premium") {
-                            // Handle premium subscription logic
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
-                        )
-                        .foregroundColor(.black)
-                        .cornerRadius(10)
+                    }
+
+                    Button(action: { handleSwipe(job: jobManager.jobs.first, accepted: true) }) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.green)
                     }
                 }
+                .padding(.bottom, 20)
             }
-            .frame(height: UIScreen.main.bounds.height * 0.75)
-
-            HStack(spacing: 20) {
-                Button(action: undoSwipe) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray)
-                }
-                Button(action: { handleSwipe(job: jobManager.jobs.first, accepted: false) }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.red)
-                }
-                Button(action: { handleSwipe(job: jobManager.jobs.first, accepted: true) }) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.green)
-                }
-            }
-            .padding()
         }
         .sheet(isPresented: $showJobPosting) {
             JobPostingView(jobManager: jobManager)
         }
+        .sheet(isPresented: $showPreferences) {
+            JobPreferencesView()
+        }
     }
 
-    func handleSwipe(job: Job?, accepted: Bool) {
+    func handleSwipe(job: JobPosting?, accepted: Bool) {
         guard let job = job else { return }
-
+        
         withAnimation {
             jobManager.jobs.removeAll { $0.id == job.id }
-            previousJobs.append(job)
+            previousJobs.append(job.copy())
             swipeCount += 1
-        }
-
-        if accepted {
-            submitApplication(for: job)
         }
     }
 
     func undoSwipe() {
         if let lastJob = previousJobs.popLast() {
             withAnimation {
-                jobManager.jobs.insert(lastJob, at: 0)
+                jobManager.jobs.insert(lastJob.copy(), at: 0)
                 swipeCount -= 1
             }
         }
     }
-
-    func submitApplication(for job: Job) {
-        print("Application submitted for \(job.title) at \(job.company)")
-        // API call to submit application goes here
-    }
-
-    func isPremiumUser() -> Bool {
-        return false // Change this based on actual premium status logic
-    }
 }
 
+// MARK: - Job Card View
 struct JobCardView: View {
-    let job: Job
+    @Binding var job: JobPosting
     let onSwipe: (Bool) -> Void
 
     @State private var offset: CGSize = .zero
@@ -123,28 +120,29 @@ struct JobCardView: View {
     var body: some View {
         ZStack {
             if isFlipped {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.white)
-                    .shadow(radius: 5)
-                    .frame(height: 500)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.black.opacity(0.9))
+                    .shadow(radius: 10)
+                    .frame(width: 350, height: 550)
                     .overlay(
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Responsibilities")
-                                .font(.headline)
-                                .bold()
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("responsibilities")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(.gold)
                             Text(job.responsibilities)
-                                .font(.body)
-                                .padding(.bottom, 5)
+                                .font(.system(size: 16, design: .rounded))
+                                .foregroundColor(.white)
 
-                            Text("Education Required")
-                                .font(.headline)
-                                .bold()
+                            Text("education required")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(.gold)
                             Text(job.education)
-                                .font(.body)
+                                .font(.system(size: 16, design: .rounded))
+                                .foregroundColor(.white)
 
                             Spacer()
-                            Text("Tap to flip back")
-                                .font(.caption)
+                            Text("tap to flip back")
+                                .font(.system(size: 14, design: .rounded))
                                 .foregroundColor(.gray)
                         }
                         .padding()
@@ -155,56 +153,50 @@ struct JobCardView: View {
                         }
                     }
             } else {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color(UIColor(red: 253/255, green: 218/255, blue: 13/255, alpha: 1)))
-                    .shadow(radius: 5)
-                    .frame(height: 500)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [Color.gold, Color.orangish]),
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ))
+                    .shadow(radius: 10)
+                    .frame(width: 350, height: 550)
                     .overlay(
-                        VStack(spacing: 10) {
+                        VStack(spacing: 15) {
                             Text(job.title)
-                                .font(.title)
-                                .bold()
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
+
                             Text(job.company)
-                                .font(.headline)
-                                .foregroundColor(.gray)
+                                .font(.system(size: 22, design: .rounded))
+                                .foregroundColor(.white)
+
                             Text(job.location)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Text(job.salary)
-                                .font(.body)
-                                .padding(.top, 10)
+                                .font(.system(size: 18, design: .rounded))
+                                .foregroundColor(.gray)
+
+                            Divider().background(Color.white)
+
+                            Text("$\(job.salary)") // Fixed Int to String conversion
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
 
                             Spacer()
-                            Text("Tap for details")
-                                .font(.caption)
+                            Text("tap for details")
+                                .font(.system(size: 14, design: .rounded))
                                 .foregroundColor(.gray)
                         }
                         .padding()
                     )
-                    .offset(offset)
-                    .rotationEffect(.degrees(Double(offset.width / 10)))
-                    .gesture(
-                        DragGesture()
-                            .onChanged { gesture in
-                                offset = gesture.translation
-                            }
-                            .onEnded { _ in
-                                if offset.width > 150 {
-                                    onSwipe(true) // Accepted
-                                } else if offset.width < -150 {
-                                    onSwipe(false) // Rejected
-                                } else {
-                                    offset = .zero // Reset if not swiped far enough
-                                }
-                            }
-                    )
-                    .onTapGesture {
-                        withAnimation {
-                            isFlipped.toggle()
-                        }
-                    }
             }
         }
-        .frame(width: 320, height: 500)
+        .frame(width: 350, height: 550)
+        .shadow(radius: 8)
+    }
+}
+
+// MARK: - PreviewProvider
+struct JobListingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        JobListingsView(jobManager: JobManager()) // Uses a sample JobManager instance
     }
 }
