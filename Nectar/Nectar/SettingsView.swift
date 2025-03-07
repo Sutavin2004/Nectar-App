@@ -9,47 +9,52 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var currentScreen: String?
-
+    
     var body: some View {
-        VStack {
-            // Settings Screen Title
-            Text("Settings")
-                .font(.largeTitle)
-                .padding()
-
-            // List of settings options
-            List {
-                Button("Edit Profile") {
-                    // Navigate to Profile screen
-                    currentScreen = "profile" // Go to the Profile screen
+        NavigationView {
+            VStack {
+                List {
+                    Section(header: Text("Account").font(.headline).foregroundColor(.gray)) {
+                        Button(action: { currentScreen = "profile" }) {
+                            SettingsRow(icon: "person.crop.circle", title: "Edit Profile")
+                        }
+                        Button(action: { print("Change Password tapped") }) {
+                            SettingsRow(icon: "key.fill", title: "Change Password")
+                        }
+                    }
+                    
+                    Section(header: Text("Preferences").font(.headline).foregroundColor(.gray)) {
+                        Button(action: { print("Notifications tapped") }) {
+                            SettingsRow(icon: "bell.fill", title: "Notifications")
+                        }
+                    }
+                    
+                    Section(header: Text("Account Actions").font(.headline).foregroundColor(.gray)) {
+                        Button(action: { print("Log Out tapped") }) {
+                            SettingsRow(icon: "arrow.right.square.fill", title: "Log Out", color: .red)
+                        }
+                    }
                 }
-                Button("Change Password") {
-                    // Placeholder for Change Password functionality
-                    print("Change Password tapped")
-                }
-                Button("Notifications") {
-                    // Placeholder for Notifications functionality
-                    print("Notifications tapped")
-                }
-                Button("Log Out") {
-                    // Placeholder for Log Out functionality
-                    print("Log Out tapped")
-                }
+                .listStyle(InsetGroupedListStyle())
+                .navigationTitle("Settings")
             }
-            .padding()
-
-            Spacer()
-
-            // Back Button to go back to Profile
-            Button("Back to Profile") {
-                currentScreen = "profile" // Go back to the Profile screen
-            }
-            .padding()
-            .background(Color.red)
-            .foregroundColor(.white)
-            .cornerRadius(10)
         }
-        .padding()
+    }
+}
+
+struct SettingsRow: View {
+    let icon: String
+    let title: String
+    var color: Color = .primary
+    
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .frame(width: 25)
+            Text(title)
+                .foregroundColor(color)
+        }
     }
 }
 
