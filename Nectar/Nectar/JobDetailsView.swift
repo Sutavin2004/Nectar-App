@@ -23,8 +23,11 @@ struct JobDetailsView: View {
             NavigationLink(destination: JobApplicationConfirmationView(currentScreen: $currentScreen)) {
                 Text("Apply for Job")
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
+                    )
+                    .foregroundColor(.black)
                     .cornerRadius(10)
             }
         }

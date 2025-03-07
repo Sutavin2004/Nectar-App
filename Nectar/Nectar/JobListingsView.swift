@@ -18,28 +18,19 @@ struct Job: Identifiable {
 }
 
 struct JobListingsView: View {
-    @State private var jobs = [
-        Job(title: "Software Developer", company: "Apple", location: "Cupertino, CA", salary: "$120k - $150k", responsibilities: "Develop iOS applications, collaborate with cross-functional teams, write clean and scalable code.", education: "Bachelor’s in Computer Science or equivalent experience"),
-        Job(title: "Data Analyst", company: "Google", location: "New York, NY", salary: "$80k - $110k", responsibilities: "Analyze large datasets, generate reports, optimize business processes.", education: "Bachelor’s in Statistics, Mathematics, or related field"),
-        Job(title: "UI/UX Designer", company: "Meta", location: "San Francisco, CA", salary: "$90k - $130k", responsibilities: "Design intuitive interfaces, conduct user research, collaborate with developers.", education: "Bachelor’s in Design, Human-Computer Interaction, or similar"),
-        Job(title: "Product Manager", company: "Tesla", location: "Austin, TX", salary: "$110k - $140k", responsibilities: "Define product vision, manage development cycles, coordinate with stakeholders.", education: "Bachelor’s in Business, Engineering, or related field"),
-        Job(title: "Cybersecurity Analyst", company: "Microsoft", location: "Redmond, WA", salary: "$95k - $125k", responsibilities: "Monitor security threats, implement cybersecurity protocols, conduct risk assessments.", education: "Bachelor’s in Cybersecurity, Computer Science, or related field"),
-        Job(title: "Marketing Coordinator", company: "Amazon", location: "Seattle, WA", salary: "$65k - $85k", responsibilities: "Develop marketing strategies, manage campaigns, analyze market trends.", education: "Bachelor’s in Marketing, Communications, or related field"),
-        Job(title: "Mechanical Engineer", company: "SpaceX", location: "Hawthorne, CA", salary: "$100k - $135k", responsibilities: "Design and test aerospace components, collaborate with engineers, improve manufacturing processes.", education: "Bachelor’s in Mechanical Engineering or equivalent"),
-        Job(title: "Financial Analyst", company: "Goldman Sachs", location: "New York, NY", salary: "$90k - $120k", responsibilities: "Conduct financial forecasting, prepare reports, assess investment opportunities.", education: "Bachelor’s in Finance, Accounting, or related field"),
-        Job(title: "Software Developer", company: "Netflix", location: "Los Gatos, CA", salary: "$130k - $160k", responsibilities: "Develop high-performance applications, optimize video streaming algorithms, collaborate with engineers.", education: "Bachelor’s in Computer Science or equivalent experience"),
-        Job(title: "Graphic Designer", company: "Adobe", location: "San Jose, CA", salary: "$75k - $100k", responsibilities: "Create visual designs, collaborate with marketing teams, develop brand guidelines.", education: "Bachelor’s in Graphic Design, Visual Arts, or related field")
-    ]
+    @ObservedObject var jobManager: JobManager
 
     @State private var swipeCount = 0
     @State private var previousJobs: [Job] = []
     let maxFreeSwipes = 15
+    
+    @State private var showJobPosting = false
 
     var body: some View {
         VStack {
             ZStack {
                 if swipeCount < maxFreeSwipes || isPremiumUser() {
-                    ForEach(jobs) { job in
+                    ForEach(jobManager.jobs) { job in
                         JobCardView(job: job) { accepted in
                             handleSwipe(job: job, accepted: accepted)
                         }
@@ -54,8 +45,11 @@ struct JobListingsView: View {
                             // Handle premium subscription logic
                         }
                         .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
+                        )
+                        .foregroundColor(.black)
                         .cornerRadius(10)
                     }
                 }
@@ -68,12 +62,12 @@ struct JobListingsView: View {
                         .font(.largeTitle)
                         .foregroundColor(.gray)
                 }
-                Button(action: { handleSwipe(job: jobs.first, accepted: false) }) {
+                Button(action: { handleSwipe(job: jobManager.jobs.first, accepted: false) }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.largeTitle)
                         .foregroundColor(.red)
                 }
-                Button(action: { handleSwipe(job: jobs.first, accepted: true) }) {
+                Button(action: { handleSwipe(job: jobManager.jobs.first, accepted: true) }) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.largeTitle)
                         .foregroundColor(.green)
@@ -81,13 +75,16 @@ struct JobListingsView: View {
             }
             .padding()
         }
+        .sheet(isPresented: $showJobPosting) {
+            JobPostingView(jobManager: jobManager)
+        }
     }
 
     func handleSwipe(job: Job?, accepted: Bool) {
         guard let job = job else { return }
 
         withAnimation {
-            jobs.removeAll { $0.id == job.id }
+            jobManager.jobs.removeAll { $0.id == job.id }
             previousJobs.append(job)
             swipeCount += 1
         }
@@ -100,7 +97,7 @@ struct JobListingsView: View {
     func undoSwipe() {
         if let lastJob = previousJobs.popLast() {
             withAnimation {
-                jobs.insert(lastJob, at: 0)
+                jobManager.jobs.insert(lastJob, at: 0)
                 swipeCount -= 1
             }
         }
@@ -209,11 +206,5 @@ struct JobCardView: View {
             }
         }
         .frame(width: 320, height: 500)
-    }
-}
-
-struct JobListingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        JobListingsView()
     }
 }

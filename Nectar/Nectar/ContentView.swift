@@ -13,11 +13,13 @@ struct ContentView: View {
     @State private var showSignIn = false // Toggle for showing sign in screen
     @State private var currentUser: User? = nil // Stores the logged-in user
     
+    @StateObject private var jobManager = JobManager()
+    
     var body: some View {
         NavigationView {
             if isSignedIn, let user = currentUser {
                 // ✅ Show main screen after signing in
-                HomeView(user: user)
+                HomeView(user: user, jobManager: jobManager)
             } else {
                 // ✅ Show Welcome Screen before login
                 WelcomeScreen(showSignUp: $showSignUp, showSignIn: $showSignIn)
@@ -77,16 +79,17 @@ struct WelcomeScreen: View {
 // MARK: - Home Screen (After Sign In)
 struct HomeView: View {
     let user: User
+    @ObservedObject var jobManager: JobManager
     
     var body: some View {
         TabView {
-            JobListingsView()
+            JobListingsView(jobManager: jobManager)
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("Home")
                 }
             
-            JobPostingView()
+            JobPostingView(jobManager: jobManager)
                 .tabItem {
                     Image(systemName: "plus.circle.fill")
                     Text("Post Job")

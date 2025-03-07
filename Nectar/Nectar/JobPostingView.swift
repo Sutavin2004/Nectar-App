@@ -8,41 +8,106 @@
 import SwiftUI
 
 struct JobPostingView: View {
-    
+    @ObservedObject var jobManager: JobManager
 
     @State private var jobTitle = ""
-    @State private var jobDescription = ""
+    @State private var companyName = ""
+    @State private var location = ""
+    @State private var salary = ""
+    @State private var responsibilities = ""
+    @State private var education = ""
+
+    @State private var showConfirmation = false // ✅ New state to show confirmation
+
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        VStack {
-            Text("Post a Job")
-                .font(.largeTitle)
+        NavigationView {
+            VStack {
+                Text("Post a Job")
+                    .font(.largeTitle)
+                    .padding()
+
+                TextField("Job Title", text: $jobTitle)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("Company Name", text: $companyName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("Location", text: $location)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("Salary", text: $salary)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("Responsibilities", text: $responsibilities)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                TextField("Education Requirements", text: $education)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                Button(action: postJob) {
+                    Text("Post Job")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            LinearGradient(gradient: Gradient(colors: [.yellow, .orangish, .gold]), startPoint: .top, endPoint: .bottom)
+                        )
+                        .foregroundColor(.black)
+                        .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                }
                 .padding()
 
-            TextField("Job Title", text: $jobTitle)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                if showConfirmation { // ✅ Show confirmation message when job is posted
+                    Text("Job Posted Successfully!")
+                        .foregroundColor(.green)
+                        .font(.headline)
+                        .padding()
+                }
 
-            TextField("Job Description", text: $jobDescription)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-            Button("Post Job") {
-                // Code to post the job can go here
+                Spacer()
             }
             .padding()
-            .background(Color.green)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-
-            
+            .navigationBarItems(trailing: Button("Cancel") {
+                presentationMode.wrappedValue.dismiss()
+            })
         }
-        .padding()
     }
-}
 
-struct JobPostingView_Previews: PreviewProvider {
-    static var previews: some View {
-        JobPostingView()
+    // ✅ Function to Post a Job
+    func postJob() {
+        let newJob = Job(
+            title: jobTitle,
+            company: companyName,
+            location: location,
+            salary: salary,
+            responsibilities: responsibilities,
+            education: education
+        )
+
+        jobManager.addJob(newJob)
+
+        // ✅ Clear input fields
+        jobTitle = ""
+        companyName = ""
+        location = ""
+        salary = ""
+        responsibilities = ""
+        education = ""
+
+        // ✅ Show confirmation message
+        showConfirmation = true
+
+        // ✅ Hide the confirmation message after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            showConfirmation = false
+        }
     }
 }
